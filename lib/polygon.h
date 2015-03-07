@@ -133,6 +133,8 @@ public:
 
 		topLeft.x = 1<<31-1, bottomRight.x = 1<<31;
 		topLeft.y = 1<<31-1, bottomRight.y = 1<<31;
+
+		area = 0;
 	}
 
 	void add(Point p) {
@@ -140,6 +142,12 @@ public:
 		bottomRight.x = std::max(bottomRight.x, p.x); bottomRight.y = std::max(bottomRight.y, p.y);
 
 		points.push_back(p);
+
+		// update area
+		if (points.size() < 3) return;
+		int n = points.size();
+		area -= (points[n-2].x * points[0].y - points[n-2].y * points[0].x);
+		area += (points[n-1].x * points[0].y - points[n-1].y * points[0].x);
 	}
 
 	// methods for accessing points
@@ -189,15 +197,36 @@ public:
 		return bottomRight;
 	}
 
+	double getArea() {
+		return fabs((double)area) / 2.;
+	}
+
+	int getOrientation() {
+		return area ? area / abs(area) : area;
+	}
+
+
 	void print() {
 		for (std::vector<Point>::iterator point = points.begin(); point != points.end(); ++point) {
 			printf("%d %d\n", point->x, point->y);
 		}
 	}
-	std::vector<std::pair<Point, Point> > getLines() {
+
+	std::vector<std::pair<Point, Point> > getLinesAsPair() {
 		std::vector<std::pair<Point, Point> > lines;
 		for (int i = 0; i < size(); ++i) {
 			lines.push_back(std::make_pair(points[i], points[(i + 1) % size()]));
+		}
+		return lines;
+	}
+
+	std::vector<Line> getLines() {
+		std::vector<Line> lines;
+		for (int i = 1; i < size(); ++i) {
+			lines.push_back(Line(points[i-1], points[i], borderColor, thickness));
+		}
+		if (size()) {
+			lines.push_back(Line(points[size()-1], points[0], borderColor, thickness));
 		}
 		return lines;
 	}
@@ -207,6 +236,8 @@ public:
 	Color borderColor;			// line color of the polygon
 	float thickness;			// thicknes of the border line
 	Frame *pattern;
+
+	int area;					// 2 * area * orientation
 
 	Point topLeft, bottomRight;
 };

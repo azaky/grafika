@@ -53,6 +53,8 @@ public:
 		}
 
 		fclose(file);
+	std::vector<Polygon> polygons;
+	std::vector<Polyline> polylines;
 
 		calcBoundingBox();
 	}
@@ -213,6 +215,14 @@ public:
 		Line(Point(bottomRight.x, topLeft.y), bottomRight, color).draw(f);
 		topLeft -= pos;
 		bottomRight -= pos;
+	}
+
+	std::vector<Polygon>& getPolygons() {
+		return polygons;
+	}
+
+	std::vector<Polyline>& getPolylines() {
+		return polylines;
 	}
 
 private:
