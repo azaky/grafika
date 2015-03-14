@@ -65,7 +65,7 @@ public:
 	}
 
 	//fungsi untuk menemukan titik ujung segmen garis
-	Point segmentation (Point p1, Point p2, float l){
+	void segmentation (float l){
 		// Point temp;
 		float d = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 		if (d > l){
@@ -74,7 +74,6 @@ public:
 				p2 = temp;
 			} while(sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)) > l);
 		}
-		return p2;
 	}
 
 	Point p1, p2;

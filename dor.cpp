@@ -32,6 +32,7 @@ int main(){
 	Sprite dummyPlane(plane);
 	bool isPlaneBulletExist = false;
 	Line planeBullet(Point(0,0), Point(0,0),Color::WHITE);
+	bool isPlaneExplode = false;
 
 	Sprite ship(Color::EMPTY, Color::RED);
 	ship.add("object/ship_above");
@@ -62,6 +63,7 @@ int main(){
 	Sprite dummyShip(ship);
 	bool isShipBulletExist = false;
 	Line shipBullet(Point(0,0), Point(0,0),Color::WHITE);
+	bool isShipExplode = false;
 
 	int framerate = 15;
 	float period = 1. / framerate;
@@ -69,7 +71,7 @@ int main(){
 	
 	int iframe = 0;
 
-	while(true){
+	while(!isShipExplode){
 		fb.clear();
 		// ship
 		// find the appropriate position
@@ -96,8 +98,6 @@ int main(){
 		ship.setPos(Point(shipPath[shipI].x + (int)(shipPR * (shipPath[shipI+1].x - shipPath[shipI].x)),
 			shipPath[shipI].y + (int)(shipPR * (shipPath[shipI+1].y - shipPath[shipI].y))));
 		ship.rotate(shipAng - 90);
-
-		
 
 		if (shipI == shipPath.size() - 2 && shipD + period * shipV >= shipTD){
 			std::reverse(shipPath.points.begin(), shipPath.points.end());
@@ -131,10 +131,6 @@ int main(){
 			planePath[planeI].y + (int)(planePR * (planePath[planeI+1].y - planePath[planeI].y))));
 		plane.rotate(planeAng -180);
 
-		
-		
-		
-
 		if (planeI == planePath.size() - 2 && planeD + period * planeV >= planeTD){
 			std::reverse(planePath.points.begin(), planePath.points.end());
 			planeD = 0;
@@ -144,12 +140,11 @@ int main(){
 		plane.draw(&fb);
 		ship.draw(&fb);
 		
+		//draw bullet if bullet doesn't exist; move if exists
 		if(!isShipBulletExist){
-			Point shipBullet0 = ship.getPos();
-			Point shipBullet1 = Point(shipPath[shipI+1].x,shipPath[shipI+1].y);
-			Point shipBullet2 = shipBullet.segmentation(shipBullet0, shipBullet1,15);
-			shipBullet.p1 = shipBullet0;
-			shipBullet.p2 = shipBullet2;
+			shipBullet.p1 = ship.getPos();
+			shipBullet.p2 = Point(shipPath[shipI+1].x,shipPath[shipI+1].y);
+			shipBullet.segmentation(15);
 			shipBullet.draw(&fb);
 			isShipBulletExist = true;	
 		} else {
@@ -164,11 +159,9 @@ int main(){
 		}
 		
 		if(!isPlaneBulletExist){
-			Point planeBullet0 = plane.getPos();
-			Point planeBullet1 = Point(planePath[planeI+1].x,planePath[planeI+1].y);
-			Point planeBullet2 = planeBullet.segmentation(planeBullet0, planeBullet1,15);
-			planeBullet.p1 = planeBullet0;
-			planeBullet.p2 = planeBullet2;
+			planeBullet.p1 = plane.getPos();
+			planeBullet.p2 = Point(planePath[planeI+1].x,planePath[planeI+1].y);
+			planeBullet.segmentation(15);
 			planeBullet.draw(&fb);
 			isPlaneBulletExist = true;	
 		} else {
@@ -184,7 +177,18 @@ int main(){
 			// shipBullet.p2 = Point(new_x, new_y);
 			planeBullet.draw(&fb);
 		}
+
+		if(planeBullet.p1.x == ship.getTopLeft().x && planeBullet.p1.x <= ship.getBottomRight().x && planeBullet.p1.y >= ship.getTopLeft().y && planeBullet.p1.y <= ship.getBottomRight().y){
+			printf("kapal meledak!\n");
+			isShipExplode = true;
+			isPlaneBulletExist = false;
+		}
 		
+		if(shipBullet.p1.x >= plane.getTopLeft().x && shipBullet.p1.x <= plane.getBottomRight().x && shipBullet.p1.y >= plane.getTopLeft().y && shipBullet.p1.y <= plane.getBottomRight().y){
+			printf("pesawat meledak!\n");
+			isPlaneExplode = true;
+			isShipBulletExist = false;
+		}
 
 		float now_render = clock();
 		usleep(std::max(0., 1e6 / framerate - (now_render - last_render)));
