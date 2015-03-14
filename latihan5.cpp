@@ -4,7 +4,7 @@
 #include "lib/sprite.h"
 #include <time.h>
 
-#define INDONESIAN_MAP_FILE "object/indonesia_1km"
+#define INDONESIAN_MAP_FILE "object/indonesia_10km"
 
 int main() {
 	FrameBuffer fb;

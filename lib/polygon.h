@@ -149,7 +149,7 @@ public:
 	Point& operator[](int i) {
 		return points[i];
 	}
-	int size() {
+	int size() const {
 		return points.size();
 	}
 	
@@ -202,10 +202,10 @@ public:
 			printf("%d %d\n", (int)point->x, (int)point->y);
 		}
 	}
-	std::vector<std::pair<Point, Point> > getLines() {
-		std::vector<std::pair<Point, Point> > lines;
+	std::vector<Line> getLines() {
+		std::vector<Line> lines;
 		for (int i = 0; i < size(); ++i) {
-			lines.push_back(std::make_pair(points[i], points[(i + 1) % size()]));
+			lines.push_back(Line(points[i], points[(i + 1) % size()], borderColor, thickness));
 		}
 		return lines;
 	}

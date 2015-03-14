@@ -35,7 +35,7 @@ public:
 	}
 
 	bool operator==(const Point& rhs) {
-		return ((this->x == rhs.x) and (this->y == rhs.y));
+		return fabs(x - rhs.x) < 1e-3 && fabs(y - rhs.y) < 1e-3;
 	}
 
 	bool operator< (const Point &rhs) {
@@ -88,7 +88,7 @@ bool operator<(const Point &p1, const Point &p2) {
 	return p1.y < p2.y;
 }
 bool operator==(const Point &p1, const Point &p2) {
-	return fabs(p1.x - p2.x) < 1e-7 && fabs(p1.y - p2.y) < 1e-7;
+	return fabs(p1.x - p2.x) < 1e-3 && fabs(p1.y - p2.y) < 1e-3;
 }
 
 #endif

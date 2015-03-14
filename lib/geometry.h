@@ -147,15 +147,15 @@ namespace Geometry {
 	}
 
 	/** Check position of a point with respect to a polygon  **/
-	bool isPointInsidePolygon(Point p, Polygon poly){
+	bool isPointInsidePolygon(const Point &p, const Polygon &poly){
 		/* ray casting to the right */
 		Line ray (p,p + Point(1,0));
-		int n = (int)poly.size();
+		int n = poly.size();
 		/* counts the number of intersections */
 		int nIntersection = 0;
 		for (int i = 0; i < n; ++i){
 			Line side(poly[i],poly[(i+1)%n]);
-			if (isOnSegment(p,side)) return false;
+			if (isOnSegment(p,side)) return true;
 			if (isParallel(ray,side)) continue;
 			Point x = intersection(ray,side);
 			// printf("dist1 = %g, dist2 = %g, dist= %g\n", dist(x, side.p1), dist(x, side.p2), dist(side.p1, side.p2));
