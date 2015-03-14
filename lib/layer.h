@@ -7,11 +7,11 @@
 #include <vector>
 #include "framebuffer.h"
 
-#define INSIDE 0 // 0000
-#define LEFT 1   // 0001
-#define RIGHT 2  // 0010
-#define BOTTOM 4 // 0100
-#define TOP 8    // 1000
+#define INSIDE  0 // 0000
+#define LEFT    1 // 0001
+#define RIGHT   2 // 0010
+#define BOTTOM  4 // 0100
+#define TOP     8 // 1000
 
 class Layer : public Drawable {
 public:
@@ -39,7 +39,7 @@ private:
         if (z < polygons.size()) {
             // cut this line -> lines
             // foreach newLine in lines > cutAndDrawLine(newLine, z+1, fb, offset)
-
+             
             // cut l with polygons[z]
             Polygon& p = *polygons[z];
             

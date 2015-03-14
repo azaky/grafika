@@ -16,6 +16,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "point.h"
+
 /**
  * Class that represents color (defined by red, green, blue, and alpha values)
  */
@@ -27,61 +29,23 @@ public:
 	char red, green, blue, alpha;
 
 	bool operator== (const Color &rhs) const {
-		return ((red == rhs.red) and (green == rhs.green) and (blue == rhs.blue) and (alpha == rhs.alpha));
+		return ((red == rhs.red) and (green == rhs.green)
+			and (blue == rhs.blue) and (alpha == rhs.alpha));
 	}
 
 	bool operator!= (const Color &rhs) const {
 		return (!(*this == rhs));
 	}
 	/* static constants */
-	static const Color RED, GREEN, BLUE, YELLOW, PURPLE, CYAN, BLACK, WHITE, EMPTY;
-};
-
-/**
- * Class that represents 2D point
- */
-class Point {
-public:
-	Point() : x(0), y(0) {}
-	Point(int _x, int _y) : x(_x), y(_y) {}
-	
-	void resize(float size, const Point& center = Point()) {
-		*this -= center;
-		x *= size;
-		y *= size;
-		*this += center;
-	}
-
-	Point operator+=(const Point& rhs) {
-		x += rhs.x;
-		y += rhs.y;
-		return *this;
-	}
-
-	Point operator+(const Point& rhs) {
-		return Point(x+rhs.x, y+rhs.y);
-	}
-
-	Point operator-=(const Point& rhs) {
-		x -= rhs.x;
-		y -= rhs.y;
-		return *this;
-	}
-
-	Point operator-(const Point& rhs) {
-		return Point(x-rhs.x, y-rhs.y);
-	}
-
-	void rotate(const int& degree, const Point& offset = Point(0, 0)) {
-		*this -= offset;
-		Point temp = *this;
-		float rad = degree*3.14159265/180.0;
-		x = temp.x*cos(rad)-temp.y*sin(rad);
-		y = temp.x*sin(rad)+temp.y*cos(rad);
-		*this += offset;
-	}
-
-	int x, y;
+	static const Color RED;
+	static const Color GREEN;
+	static const Color BLUE;
+	static const Color YELLOW;
+	static const Color PURPLE;
+	static const Color CYAN;
+	static const Color BLACK;
+	static const Color WHITE;
+	static const Color EMPTY;
 };
 
 class Frame {
@@ -109,9 +73,14 @@ public:
 	};
 
 	void set(Point p, Color c) {
-		matrix[p.y][p.x] = c;
-		xres = std::max(xres, p.x);
-		yres = std::max(yres, p.y);
+		// Cast the coordinate to integers, since the Frame accepts only integer
+		// coordinates
+		int x = (int)p.x;
+		int y = (int)p.y;
+
+		matrix[y][x] = c;
+		xres = std::max(xres, x);
+		yres = std::max(yres, y);
 
 	};
 	void set(int x, int y, char red, char green, char blue, char alpha = 0) {
@@ -122,18 +91,23 @@ public:
 	};
 	
 	Color get(Point p) {
-		if (p.y > yres)
-			p.y %= yres+1;
-		while (p.y < 0)
-			p.y += yres+1;
+		// Cast the coordinate to integers, since the Frame accepts only integer
+		// coordinates
+		int x = (int)p.x;
+		int y = (int)p.y;
 
-		if (p.x > xres)
-			p.x %= xres+1;
-		while (p.x < 0)
-			p.x += xres+1;
+		if (y > yres)
+			y %= yres+1;
+		while (y < 0)
+			y += yres+1;
 
-		if ((matrix.count(p.y)) and (matrix[p.y].count(p.x)))
-			return matrix[p.y][p.x];
+		if (x > xres)
+			x %= xres+1;
+		while (x < 0)
+			x += xres+1;
+
+		if ((matrix.count(y)) and (matrix[y].count(x)))
+			return matrix[y][x];
 		return Color::EMPTY;
 	};
 	
@@ -164,6 +138,7 @@ private:
 	std::map<int, std::map<int, Color> > matrix;
 	int xres, yres;
 };
+
 /**
  * Helper class to access linux framebuffer.
  * Source: http://xathrya.web.id/blog/2012/10/26/graphic-programming-using-frame-buffer-on-linux/
@@ -172,12 +147,14 @@ private:
 class FrameBuffer : public Frame {
 public:	
 	FrameBuffer() {
+		// initialize when needed
 		if (fbp == NULL) {
 			init();
 		}
 	}
 
 	~FrameBuffer() {
+		// close the framebuffer file
 		close(fbfd);
 	}
 
@@ -232,7 +209,12 @@ public:
 	 * Set pixel at p using color c.
 	 */
 	void set(Point p, Color c) {
-		set(p.x, p.y, c.red, c.green, c.blue, c.alpha);
+		// Cast the coordinate to integers, since the Frame accepts only integer
+		// coordinates
+		int x = (int)p.x;
+		int y = (int)p.y;
+
+		set(x, y, c.red, c.green, c.blue, c.alpha);
 	}
 
 	/**
@@ -269,7 +251,12 @@ public:
 	 * Get color at p.
 	 */
 	Color get(Point p) {
-		return get(p.x, p.y);
+		// Cast the coordinate to integers, since the Frame accepts only integer
+		// coordinates
+		int x = (int)p.x;
+		int y = (int)p.y;
+
+		return get(x, y);
 	}
 
 	/**
@@ -314,20 +301,12 @@ public:
 		}
 	}
 
-	/**
-	 * Refresh the screen. Unmap the memory back to the "/dev/fb0"
+	/*
+	 * Getter for informations regarding the frame buffer
 	 */
-	void refresh() {
-		/* unmap the framebuffer */
-		munmap(fbp, finfo.smem_len);
-
-		/* after the unmap operation, fbp and fbfd will be invalid.
-		 * it is necessary to do re-initialize */
-		close(fbfd);
-		init();
+	int getBitsPerPixel() {
+		return bits_per_pixel;
 	}
-
-	int bits_per_pixel;		/* guess what */
 
 	int getXSize() {
 		return xres;
@@ -346,6 +325,7 @@ private:
 	}
 
 	int xres, yres;			/* screen resolution */
+	int bits_per_pixel;		/* guess what */
 	struct fb_var_screeninfo vinfo;
 	struct fb_fix_screeninfo finfo;
 	static int fbfd;		/* frame buffer file descriptor */

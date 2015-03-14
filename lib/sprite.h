@@ -33,7 +33,7 @@ public:
 			Polygon polygon(defaultColor, defaultBorderColor, defaultThickness);
 			while (nPoint--) {
 				Point point;
-				fscanf(file, "%d %d", &point.x, &point.y);
+				fscanf(file, "%f %f", &point.x, &point.y);
 
 				polygon.add(point);
 			}
@@ -46,15 +46,13 @@ public:
 			Polyline polyline;
 			while (nPoint--) {
 				Point point;
-				fscanf(file, "%d %d", &point.x, &point.y);
+				fscanf(file, "%f %f", &point.x, &point.y);
 				polyline.add(point);
 			}
 			polylines.push_back(polyline);
 		}
 
 		fclose(file);
-	std::vector<Polygon> polygons;
-	std::vector<Polyline> polylines;
 
 		calcBoundingBox();
 	}
@@ -200,8 +198,8 @@ public:
 			}
 		}
 		for (int i = 0; i < lines.size(); ++i) {
-			lines[i].p0 += pos;
 			lines[i].p1 += pos;
+			lines[i].p2 += pos;
 		}
 		return lines;
 	}
@@ -215,14 +213,6 @@ public:
 		Line(Point(bottomRight.x, topLeft.y), bottomRight, color).draw(f);
 		topLeft -= pos;
 		bottomRight -= pos;
-	}
-
-	std::vector<Polygon>& getPolygons() {
-		return polygons;
-	}
-
-	std::vector<Polyline>& getPolylines() {
-		return polylines;
 	}
 
 private:

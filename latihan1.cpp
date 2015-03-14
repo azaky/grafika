@@ -145,7 +145,6 @@ int main(int argc, char** argv) {
 				fb.set(width - 100 - size * 256 + x, 110 + size * 256 + y, color);
 			}
 		}
-		fb.refresh();
 		
 		// baca piilhan
 		cmd = getch();

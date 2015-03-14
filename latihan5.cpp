@@ -12,6 +12,7 @@ int main() {
 	Sprite mapOfIndonesia(Color::EMPTY, Color::GREEN);
 	mapOfIndonesia.add(INDONESIAN_MAP_FILE);
 
+	// Canvas canvas(Point(1366, 768), Point(fb.getXSize(), fb.getYSize()));
 	Canvas canvas(Point(1366, 768), Point(fb.getXSize(), fb.getYSize()));
 	canvas.addSprite(&mapOfIndonesia);
 	// canvas.addPolygonFile(INDONESIAN_MAP_FILE);
@@ -97,9 +98,9 @@ int main() {
 		fb.clear();
 		if (iframe++ % 20 == 0) {
 			system("clear");
-			printf("Axis  : x = %d, y = %d, wheel = %d\n", axis.x, axis.y, wheel);
+			printf("Axis  : x = %d, y = %d, wheel = %d\n", (int)axis.x, (int)axis.y, wheel);
 			printf("Button: left = %d, middle = %d, right = %d\n", left, middle, right);
-			printf("Canvas: viewPos = (%d, %d), viewLen = (%d, %d), windowPos = (%d, %d), windowLen = (%d, %d)\n", canvas.getViewPos().x, canvas.getViewPos().y, canvas.getViewLen().x, canvas.getViewLen().y, canvas.getWindowPos().x, canvas.getWindowPos().y, canvas.getWindowLen().x, canvas.getWindowLen().y);
+			printf("Canvas: viewPos = (%f, %f), viewLen = (%f, %f), windowPos = (%f, %f), windowLen = (%f, %f)\n",canvas.getViewPos().x, canvas.getViewPos().y, canvas.getViewLen().x, canvas.getViewLen().y, canvas.getWindowPos().x, canvas.getWindowPos().y, canvas.getWindowLen().x, canvas.getWindowLen().y);
 			printf("Focus : ship: %d, plane: %d\n", focusToShip, focusToPlane);
 		}
 
@@ -138,7 +139,10 @@ int main() {
 
 		// update objek
 		// Mouse
-		Mouse::getAxis(&axis.x, &axis.y, &wheel);
+		axis.x = Mouse::getXAxis();
+		axis.y = Mouse::getYAxis();
+		wheel = Mouse::getWheelAxis();
+		// Mouse::getAxis(&axis.x, &axis.y, &wheel);
 		Mouse::getButton(&left, &middle, &right);
 
 		// drag window
@@ -178,9 +182,13 @@ int main() {
 			Cursor::POINTER.draw(&fb, axis);
 			float scale = 1;
 			// decrease/increase by 48:27 per wheel
-			scale = (float)(canvas.getWindowLen().x + 48 * (prevwheel - wheel)) / (float)(canvas.getWindowLen().x);
-			if ((int)(canvas.getWindowLen().x * scale) > 80) {
+			scale = (canvas.getWindowLen().x + 48.f * (prevwheel - wheel)) / canvas.getWindowLen().x;
+			if (canvas.getWindowLen().x * scale > 80) {
 				canvas.scaleWindow(scale, canvas.viewToWindow(axis) - canvas.getWindowPos());
+				// Point windowLen = canvas.getWindowLen();
+				// canvas.setWindowLen(Point((int)windowLen.x, (int)windowLen.y));
+				// Point windowPos = canvas.getWindowPos();
+				// canvas.setWindowPos(Point((int)windowPos.x, (int)windowPos.y));
 			}
 		}
 

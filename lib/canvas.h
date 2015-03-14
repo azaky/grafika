@@ -11,43 +11,6 @@
 #define TOP 8    // 1000
  
 class Canvas {
-private:
-	Point windowPos, windowLen; // window in canvas
-	Point viewPos, viewLen;
-
-	std::vector<Polygon> polygons; // the number of polygons in canvas
-	std::vector<Sprite*> sprites; // list of sprite in the canvas
-	Color defaultColor, defaultBorderColor;
-	int defaultThickness;
-
-	typedef int OutCode;
-	
-	// Compute the bit code for a point (x, y) using the clip rectangle
-	// bounded diagonally by (xmin, ymin), and (xmax, ymax)
-	 
-	// ASSUME THAT xmax, xmin, ymax and ymin are global constants.
- 
-	OutCode ComputeOutCode(Point p) {
-		OutCode code;
-		code = INSIDE;          // initialised as being inside of clip window
-		if (p.x < windowPos.x) {          // to the left of clip window
-			code |= LEFT;
-		}
-		else if (p.x > windowPos.x+windowLen.x)      // to the right of clip window
-			code |= RIGHT;
-		if (p.y < windowPos.y) {           // below the clip window
-			code |= BOTTOM;
-		}
-		else if (p.y > windowPos.y+windowLen.y)      // above the clip window
-			code |= TOP;
-		return code;
-	}
-
-// ABRL
-	// 1001 1000 1010
-	// 0001 0000 0010
-	// 0101 0100 0110
-	
 public:
 	Canvas(Point _windowLen, Point _viewLen, Color _color = Color::BLACK, Color _borderColor = Color::WHITE, int _thickness = 1) {
 		defaultColor = _color;
@@ -75,7 +38,7 @@ public:
 			Polygon polygon(defaultColor, Color::GREEN, 0);
 			while (nPoint--) {
 				Point point;
-				fscanf(file, "%d %d", &point.x, &point.y);
+				fscanf(file, "%f %f", &point.x, &point.y);
 
 				polygon.add(point);
 			}
@@ -175,24 +138,25 @@ public:
 			for (int j = 0; j < lines.size(); ++j) {
 				Line newEndpoints = lines[j];
 
-				#define isValid(e) (ComputeOutCode(e.p0)&ComputeOutCode(e.p1)) == INSIDE
-				#define isFinish(e) ((ComputeOutCode(e.p0) == INSIDE) and (ComputeOutCode(e.p1) == INSIDE))
+				#define isValid(e) (ComputeOutCode(e.p1)&ComputeOutCode(e.p2)) == INSIDE
+				#define isFinish(e) ((ComputeOutCode(e.p1) == INSIDE) and (ComputeOutCode(e.p2) == INSIDE))
 				
-				while ((isValid(newEndpoints)) and (not isFinish(newEndpoints))) {
-					OutCode outCode0 = ComputeOutCode(newEndpoints.p0), outCode1 = ComputeOutCode(newEndpoints.p1), outCode;
+				int tries = 0;
+				while ((isValid(newEndpoints)) and (not isFinish(newEndpoints)) and tries++ < 5) {
+					OutCode outCode0 = ComputeOutCode(newEndpoints.p1), outCode1 = ComputeOutCode(newEndpoints.p2), outCode;
 					Point p;
 					if (outCode0 != INSIDE) {
 						outCode = outCode0;
-						p = newEndpoints.p0;
+						p = newEndpoints.p1;
 					}
 					else {
 						outCode = outCode1;
-						p = newEndpoints.p1;
+						p = newEndpoints.p2;
 					}
 
-					int dy = newEndpoints.p0.y-newEndpoints.p1.y;
-					int dx = newEndpoints.p0.x-newEndpoints.p1.x;
-					int c = p.x*dy-p.y*dx;
+					float dy = newEndpoints.p1.y-newEndpoints.p2.y;
+					float dx = newEndpoints.p1.x-newEndpoints.p2.x;
+					float c = p.x*dy-p.y*dx;
 					if (outCode & TOP) {           // point is above the clip rectangle
 						p.y = (windowPos.y+windowLen.y);
 						p.x = (c+p.y*dx)/dy;
@@ -208,76 +172,52 @@ public:
 					}
 
 					if (outCode == outCode0) {
-						newEndpoints.p0 = p;
+						newEndpoints.p1 = p;
 					}
 					else
-						newEndpoints.p1 = p;
+						newEndpoints.p2 = p;
 				}
 				if (isValid(newEndpoints)) {
 					// adjust the window to view ratio
-					newEndpoints.p0 = windowToView(newEndpoints.p0);
 					newEndpoints.p1 = windowToView(newEndpoints.p1);
+					newEndpoints.p2 = windowToView(newEndpoints.p2);
 					
 					// draw to the view
-					// newEndpoints.color = Color::GREEN;
 					newEndpoints.draw(fb, offset);
 				}
 			}
 		}
-		// for (std::vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); ++polygon) {
-		// 	std::vector<std::pair<Point, Point> > lines = polygon->getLines();
-		// 	for (std::vector<std::pair<Point, Point> >::iterator endpoints = lines.begin(); endpoints != lines.end(); ++endpoints) {
-		// 		std::pair<Point, Point> newEndpoints = *endpoints;
-				
-		// 		#define isValid(e) (ComputeOutCode(e.first)&ComputeOutCode(e.second)) == INSIDE
-		// 		#define isFinish(e) ((ComputeOutCode(e.first) == INSIDE) and (ComputeOutCode(e.second) == INSIDE))
-				
-		// 		while ((isValid(newEndpoints)) and (not isFinish(newEndpoints))) {
-		// 			OutCode outCode0 = ComputeOutCode(newEndpoints.first), outCode1 = ComputeOutCode(newEndpoints.second), outCode;
-		// 			Point p;
-		// 			if (outCode0 != INSIDE) {
-		// 				outCode = outCode0;
-		// 				p = newEndpoints.first;
-		// 			}
-		// 			else {
-		// 				outCode = outCode1;
-		// 				p = newEndpoints.second;
-		// 			}
+	}
 
-		// 			int dy = newEndpoints.first.y-newEndpoints.second.y;
-		// 			int dx = newEndpoints.first.x-newEndpoints.second.x;
-		// 			int c = p.x*dy-p.y*dx;
-		// 			if (outCode & TOP) {           // point is above the clip rectangle
-		// 				p.y = (windowPos.y+windowLen.y);
-		// 				p.x = (c+p.y*dx)/dy;
-		// 			} else if (outCode & BOTTOM) { // point is below the clip rectangle
-		// 				p.y = windowPos.y;
-		// 				p.x = (c+p.y*dx)/dy;
-		// 			} else if (outCode & RIGHT) {  // point is to the right of clip rectangle
-		// 				p.x = (windowPos.x+windowLen.x);
-		// 				p.y = (p.x*dy-c)/dx;
-		// 			} else if (outCode & LEFT) {   // point is to the left of clip rectangle
-		// 				p.x = windowPos.x;
-		// 				p.y = (p.x*dy-c)/dx;
-		// 			}
+private:
+	Point windowPos, windowLen; // window in canvas
+	Point viewPos, viewLen;
 
-		// 			if (outCode == outCode0) {
-		// 				newEndpoints.first = p;
-		// 			}
-		// 			else
-		// 				newEndpoints.second = p;
-		// 		}
-		// 		if (isValid(newEndpoints)) {
-		// 			// adjust the window to view ratio
-		// 			newEndpoints.first = windowToView(newEndpoints.first);
-		// 			newEndpoints.second = windowToView(newEndpoints.second);
-					
-		// 			// draw to the view
-		// 			Line(newEndpoints.first, newEndpoints.second, Color::GREEN).draw(fb, offset);
-		// 		}
-		// 	}
-		// }
+	std::vector<Polygon> polygons; // the number of polygons in canvas
+	std::vector<Sprite*> sprites; // list of sprite in the canvas
+	Color defaultColor, defaultBorderColor;
+	int defaultThickness;
 
-
+	typedef int OutCode;
+	
+	// Compute the bit code for a point (x, y) using the clip rectangle
+	// bounded diagonally by (xmin, ymin), and (xmax, ymax)
+	 
+	// ASSUME THAT xmax, xmin, ymax and ymin are global constants.
+ 
+	OutCode ComputeOutCode(Point p) {
+		OutCode code;
+		code = INSIDE;          // initialised as being inside of clip window
+		if (p.x < windowPos.x) {          // to the left of clip window
+			code |= LEFT;
+		}
+		else if (p.x > windowPos.x+windowLen.x)      // to the right of clip window
+			code |= RIGHT;
+		if (p.y < windowPos.y) {           // below the clip window
+			code |= BOTTOM;
+		}
+		else if (p.y > windowPos.y+windowLen.y)      // above the clip window
+			code |= TOP;
+		return code;
 	}
 };

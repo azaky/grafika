@@ -5,6 +5,7 @@
 #ifndef LINE_H
 #define LINE_H
 
+#include "point.h"
 #include "drawable.h"
 #include "circle.h"
 #include <stdlib.h>
@@ -12,24 +13,24 @@
 
 class Line : public Drawable {
 public:
-	Line(Point p0 = Point(0, 0), Point p1 = Point(0, 0),
+	Line(Point p1 = Point(0, 0), Point p2 = Point(0, 0),
 			Color color = Color::WHITE, float thickness = 1, bool autoInc = false) {
-		this->p0 = p0;
 		this->p1 = p1;
+		this->p2 = p2;
 		this->thickness = thickness;
 		this->color = color;
 		this->autoInc = autoInc;
 	}
 	Line(int x0 = 0, int y0 = 0, int x1 = 0, int y1 = 0,
 			Color color = Color::WHITE, float thickness = 1, bool autoInc = false) {
-		this->p0 = Point(x0, y0);
-		this->p1 = Point(x1, y1);
+		this->p1 = Point(x0, y0);
+		this->p2 = Point(x1, y1);
 		this->thickness = thickness;
 		this->color = color;
 		this->autoInc = autoInc;
 	}
 	void draw(Frame* fb, Point offset = Point()) {
-		int x0 = p0.x, y0 = p0.y, x1 = p1.x, y1 = p1.y;
+		int x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
 		int dx =  abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
 		int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1; 
 		int err = dx + dy, e2; /* error value e_xy */
@@ -64,7 +65,7 @@ public:
 		}
 	}
 
-	Point p0, p1;
+	Point p1, p2;
 	Color color;
 	float thickness;
 	bool autoInc;
