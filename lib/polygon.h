@@ -152,6 +152,14 @@ public:
 	int size() {
 		return points.size();
 	}
+	
+	std::vector<Point>::iterator begin() {
+		return points.begin();
+	}
+
+	std::vector<Point>::iterator end() {
+		return points.end();
+	}
 
 	void rotate(const int& degree, const Point offset = Point(0, 0)) {
 		for (std::vector<Point>::iterator point = points.begin(); point != points.end(); ++point) {

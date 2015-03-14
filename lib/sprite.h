@@ -198,8 +198,8 @@ public:
 			}
 		}
 		for (int i = 0; i < lines.size(); ++i) {
-			lines[i].p0 += pos;
 			lines[i].p1 += pos;
+			lines[i].p2 += pos;
 		}
 		return lines;
 	}

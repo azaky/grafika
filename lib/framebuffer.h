@@ -52,14 +52,18 @@ public:
 		*this += center;
 	}
 
+	Point operator+(const Point& rhs) {
+		return Point(x+rhs.x, y+rhs.y);
+	}
+
+	Point operator-(const Point& rhs) {
+		return Point(x-rhs.x, y-rhs.y);
+	}
+
 	Point operator+=(const Point& rhs) {
 		x += rhs.x;
 		y += rhs.y;
 		return *this;
-	}
-
-	Point operator+(const Point& rhs) {
-		return Point(x+rhs.x, y+rhs.y);
 	}
 
 	Point operator-=(const Point& rhs) {
@@ -68,8 +72,13 @@ public:
 		return *this;
 	}
 
-	Point operator-(const Point& rhs) {
-		return Point(x-rhs.x, y-rhs.y);
+	bool operator==(const Point& rhs) {
+		return ((this->x == rhs.x) and (this->y == rhs.y));
+	}
+
+	bool operator< (const Point &rhs) {
+		if (this->x != rhs.x) return this->x < rhs.x;
+		return this->y < rhs.y;
 	}
 
 	void rotate(const int& degree, const Point& offset = Point(0, 0)) {
@@ -83,6 +92,13 @@ public:
 
 	int x, y;
 };
+Point operator+(const Point& lhs, const Point& rhs) {
+	return Point(lhs.x+rhs.x, lhs.y+rhs.y);
+}
+
+Point operator-(const Point& lhs, const Point& rhs) {
+	return Point(lhs.x-rhs.x, lhs.y-rhs.y);
+}
 
 class Frame {
 public:
