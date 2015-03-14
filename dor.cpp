@@ -178,13 +178,13 @@ int main(){
 			planeBullet.draw(&fb);
 		}
 
-		if(planeBullet.p1.x == ship.getTopLeft().x && planeBullet.p1.x <= ship.getBottomRight().x && planeBullet.p1.y >= ship.getTopLeft().y && planeBullet.p1.y <= ship.getBottomRight().y){
+		if(ship.getTopLeft() < planeBullet.p2 && planeBullet.p2 < ship.getBottomRight()){
 			printf("kapal meledak!\n");
 			isShipExplode = true;
 			isPlaneBulletExist = false;
 		}
 		
-		if(shipBullet.p1.x >= plane.getTopLeft().x && shipBullet.p1.x <= plane.getBottomRight().x && shipBullet.p1.y >= plane.getTopLeft().y && shipBullet.p1.y <= plane.getBottomRight().y){
+		if(plane.getTopLeft() < shipBullet.p2 && shipBullet.p2 < plane.getBottomRight()){
 			printf("pesawat meledak!\n");
 			isPlaneExplode = true;
 			isShipBulletExist = false;
