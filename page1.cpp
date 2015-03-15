@@ -32,18 +32,15 @@ int main(int argc, char** argv) {
 	int framerate = 10;
 	float last_render = clock();
 
-	FrameMatrix emptymatrix;
+	// FrameMatrix for pattern
 	FrameMatrix planepattern;
 	FrameMatrix shippattern;
 	FrameMatrix patternmatrix1;
 	FrameMatrix patternmatrix2;
 	FrameMatrix patternmatrix3;
-	FrameMatrix patternmatrix4;
+	FrameMatrix patternmatrix4;	
 
-	//Canvas canvas(Point(1366, 768), Point(fb.getXSize(), fb.getYSize()));
-	
-
-	
+	// Initial color
 	Color colorpick(1,1,1);
 	Color planecolor(1,1,1);
 	Color shipcolor(1,1,1);
@@ -124,15 +121,15 @@ int main(int argc, char** argv) {
 	int cmd = ' ';
 	while (true) {
 		system("clear");
+		// Gambar pesawat
 		Sprite plane(planecolor,Color::BLUE);
 		plane.add("object/plane_above");
-		// plane.setPos(Point(160,150));
 		plane.draw(&fb,Point(160,150));
 		plane.drawFill(&fb,&planepattern,Point(160,150));
 
+		// Gambar kapal
 		Sprite ship(shipcolor,Color::RED);
 		ship.add("object/ship_above");
-		// ship.setPos(Point(900,200));
 		ship.resize(4);
 		ship.draw(&fb,Point(900,200));
 		ship.drawFill(&fb,&shippattern,Point(900,200));
@@ -171,9 +168,8 @@ int main(int argc, char** argv) {
 			rectangle(width - 800 - size * 256 + px - 3, 480 + py - 3,
 				width - 800 - size * 256 + px + 3, 480 + py + 3, Color(1, 1, 1));
 		}
-
-		// rectangle (width - 750, 477 + ypos , width - 700, 527 + ypos, Color::WHITE);
 		
+		// Create pattern menu
 		Sprite pattern1(Color(0, 127, 255), Color::BLUE, 1);
 		pattern1.add("object/bird");
 		pattern1.resize(0.5);
@@ -227,10 +223,7 @@ int main(int argc, char** argv) {
 		Mouse::getAxis(&axis.x, &axis.y, &wheel);
 		Mouse::getButton(&left, &middle, &right);
 		
-
-		printf("planeclicked = %d , shipclicked = %d, wheel = %d, prevwheel = %d\n",planeclicked, shipclicked, wheel,prevwheel);
-
-		
+		// Fill Warna (Klik pesawat / Klik kapal terlebih dahulu)
 		if(Mouse::getLeftButton()){
 			if(axis.x >= 160 && axis.x <= 483 && axis.y >= 150 
 				&& axis.y <= 416){
@@ -306,6 +299,7 @@ int main(int argc, char** argv) {
 
 		fb.refresh();
 
+		// Collor pallete scroll color
 		if(Mouse::getWheelAxis()){
 			if (wheel < prevwheel) {
 				position += 6 / size;
@@ -317,6 +311,7 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		// Quit program
 		if(Mouse::getRightButton()){
 			break;
 		}
