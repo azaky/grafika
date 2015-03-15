@@ -160,6 +160,26 @@ public:
 	int getYSize() {
 		return yres;
 	}
+
+	void clear(){
+		for(int i = 0; i <= 1366; i++){
+			for(int j = 0; j <= 768; j++){
+				matrix[j][i]=Color::EMPTY;
+			}
+		}
+	}
+
+	FrameMatrix& operator=(FrameMatrix _fm){
+		xres = _fm.xres;
+		yres = _fm.yres;
+		for(int i = 0; i <= 1366; i++){
+			for(int j = 0; j <= 768; j++){
+				if(_fm.get(Point(i,j))!=Color::EMPTY)
+				matrix[j][i]=_fm.matrix[j][i];
+			}
+		}
+		return *this;
+	}
 private:
 	std::map<int, std::map<int, Color> > matrix;
 	int xres, yres;
