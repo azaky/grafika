@@ -1,6 +1,10 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
+#ifndef NUM_THREAD
+#	define NUM_THREAD 16
+#endif
+
 #include <unistd.h>
 #include <fcntl.h>		/* for fcntl */
 #include <sys/types.h>
@@ -11,10 +15,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vector>
 #include <map>
 #include <cmath>
 #include <algorithm>
+
+#include <pthread.h>
 
 #include "point.h"
 
@@ -55,8 +62,10 @@ public:
 	virtual void set(int x, int y, char red, char green, char blue, char alpha = 0) = 0;
 	virtual Color get(Point p) = 0;
 	virtual Color get(int x, int y) = 0;
+	virtual void clear() = 0;
 	virtual int getXSize() = 0;
 	virtual int getYSize() = 0;
+	bool isThreadSafe;
 };
 
 class FrameMatrix : public Frame {
@@ -127,6 +136,10 @@ public:
 		return Color::EMPTY;
 	};
 
+	void clear() {
+		matrix.clear();
+	}
+
 	int getXSize() {
 		return xres;
 	}
@@ -196,6 +209,8 @@ public:
 			visited[i].resize(yres);
 		}
 		lastSet.clear();
+
+		isThreadSafe = true;
 	}
 
 	/**
@@ -241,9 +256,11 @@ public:
 			printf("Unknown bpp format: %d bpp\n", vinfo.bits_per_pixel);
 		}
 		/* adds to lastSet */
-		if (!visited[x][y]) {
-			visited[x][y] = 1;
-			lastSet.push_back(Point(x, y));
+		if (!clearMode && isThreadSafe) {
+			if (!visited[x][y]) {
+				visited[x][y] = 1;
+				lastSet.push_back(std::make_pair(x, y));
+			}
 		}
 	}
 
@@ -289,16 +306,61 @@ public:
 		return Color(red, green, blue, alpha);
 	}
 
+	struct ClearData {
+		FrameBuffer* context;
+		int idxThread;
+	};
+
+	static void* parallelClear(void* param) {
+		ClearData *data = (ClearData*) param;
+		FrameBuffer *fb = data->context;
+		int rank = data->idxThread;
+
+		int step = fb->lastSet.size() / NUM_THREAD;
+		int startX = step * rank;
+		int finishX = step * (rank + 1);
+		if (finishX >= fb->lastSet.size()) {
+			finishX = fb->lastSet.size() - 1;
+		}
+
+		for (int x = startX; x < finishX; ++x) {
+			std::pair<int, int> &p = lastSet[x];
+			fb->set(p.first, p.second, Color::BLACK);
+			visited[p.first][p.second] = 0;
+		}
+	}
+
 	/**
 	 * Clear the screen. Color them with the default color (BLACK)
 	 */
 	void clear() {
+#if 0
+		clearMode = true;
+		pthread_t thread_pool[NUM_THREAD];
+		ClearData data[NUM_THREAD];
+		for (int i = 0; i < NUM_THREAD; ++i) {
+			data[i].context = this;
+			data[i].idxThread = i;
+			pthread_create(&thread_pool[i], NULL, FrameBuffer::parallelClear, (void*)&data[i]);
+		}
+		for (int i = 0; i < NUM_THREAD; ++i) {
+			pthread_join(thread_pool[i], NULL);
+		}
+		lastSet.clear();
+		clearMode = false;
+#endif
+#if 1
+		clearMode = true;
+		// memset(fbp + getLocation(0, 0), 0, finfo.line_length * yres);
 		while (lastSet.size()) {
-			Point &p = lastSet.back();
-			set(p.x, p.y, Color::BLACK);
-			visited[p.x][p.y] = 0;
+			// printf("huba: size = %d\n", lastSet.size());
+			std::pair<int, int> &p = lastSet.back();
+			set(p.first, p.second, Color::BLACK);
+			visited[p.first][p.second] = 0;
 			lastSet.pop_back();
 		}
+		clearMode = false;
+#endif
 	}
 
 	/*
@@ -315,6 +377,7 @@ public:
 	int getYSize() {
 		return yres;
 	}
+
 private:
 	/**
 	 * Get memory offset for pixel at (x, y).
@@ -328,10 +391,11 @@ private:
 	int bits_per_pixel;		/* guess what */
 	struct fb_var_screeninfo vinfo;
 	struct fb_fix_screeninfo finfo;
+	static bool clearMode;	/* true when clear() is called */
 	static int fbfd;		/* frame buffer file descriptor */
 	static char* fbp;		/* pointer to framebuffer */
 	static std::vector<std::vector<int> > visited;
-	static std::vector<Point> lastSet;
+	static std::vector<std::pair<int, int> > lastSet;
 };
 
 /* set default values for static variables */
@@ -344,12 +408,13 @@ const Color Color::PURPLE 	= Color(255,   0, 255);
 const Color Color::CYAN		= Color(  0, 255, 255);
 const Color Color::BLACK	= Color(  0,   0,   0);
 const Color Color::WHITE	= Color(255, 255, 255);
-const Color Color::EMPTY	= Color(-1, -1, -1);
+const Color Color::EMPTY	= Color(-1, -1, -1, -1);
 
 /* FrameBuffer variables */
 int FrameBuffer::fbfd = 0;
 char* FrameBuffer::fbp = NULL;
+bool FrameBuffer::clearMode = false;
 std::vector<std::vector<int> > FrameBuffer::visited;
-std::vector<Point> FrameBuffer::lastSet;
+std::vector<std::pair<int, int> > FrameBuffer::lastSet;
 
 #endif

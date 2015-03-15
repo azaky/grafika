@@ -6,14 +6,15 @@
 #include "polygon.h"
 
 #define sqr(i) ((i)*(i))
-const float PI = acos(-1);
-const float EPS = 1e-4;
-const float INF = 1e100;
 
 /**
  * Collection of geometry functions and algorithms
  */
 namespace Geometry {
+	const float PI = acos(-1);
+	const float EPS = 1e-3;
+	const float INF = 1e100;
+
 	/** returns z-component of cross product of two points (vectors) */
 	float cross(const Point &p1, const Point &p2) {
 		return p1.x * p2.y - p1.y * p2.x;
@@ -68,12 +69,12 @@ namespace Geometry {
 
 	/** determine whether two points belong to the same side with respect to a
 	 * line or not.
-	 * If one of them lies on the line, it returns true.
+	 * If one of them lies on the line, it returns false.
 	 */
 	bool isOnSameSide(const Point &p1, const Point &p2, const Line &s){
 		float z1 = cross(s.p2 - s.p1, p1 - s.p1);
 		float z2 = cross(s.p2 - s.p1, p2 - s.p1);
-		return (z1 + EPS < 0 && z2 + EPS < 0) || (0 < z1 - EPS && 0 < z2 - EPS) || fabs(z1) < EPS || fabs(z2) < EPS;
+		return (z1 + EPS < 0 && z2 + EPS < 0) || (0 < z1 - EPS && 0 < z2 - EPS);// || fabs(z1) < EPS || fabs(z2) < EPS;
 	}
 
 	/** determine whether a point lies on a line or not */
@@ -88,7 +89,7 @@ namespace Geometry {
 
 	/** Determine whether two segment intersects or not */
 	bool isIntersecting(const Line &s1, const Line &s2){
-		return !(isOnSameSide(s1.p1,s1.p2,s2) || isOnSameSide(s2.p1,s2.p2,s1)) || isOnLine(s1.p1,s2) || isOnLine(s1.p2,s2) || isOnLine(s2.p1,s1) || isOnLine(s2.p2,s1);
+		return !(isOnSameSide(s1.p1,s1.p2,s2) || isOnSameSide(s2.p1,s2.p2,s1));// || isOnLine(s1.p1,s2) || isOnLine(s1.p2,s2) || isOnLine(s2.p1,s1) || isOnLine(s2.p2,s1);
 	}
 
 	/** Determine whether two lines are parallel or not */
@@ -155,7 +156,7 @@ namespace Geometry {
 		int nIntersection = 0;
 		for (int i = 0; i < n; ++i){
 			Line side(poly[i],poly[(i+1)%n]);
-			if (isOnSegment(p,side)) return true;
+			if (isOnSegment(p,side)) return false;
 			if (isParallel(ray,side)) continue;
 			Point x = intersection(ray,side);
 			// printf("dist1 = %g, dist2 = %g, dist= %g\n", dist(x, side.p1), dist(x, side.p2), dist(side.p1, side.p2));
@@ -195,6 +196,7 @@ namespace Geometry {
 		hull.resize(m);
 		return hull;
 	}
+
 };
 
 #endif

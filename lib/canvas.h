@@ -124,6 +124,17 @@ public:
 		return ret;
 	}
 
+	void removeSprite(Sprite sprite){
+		for(int i = 0; i < sprites.size(); ++i){
+			if(sprites[i]->equal(sprite)){
+				sprites.erase(sprites.begin()+i);
+				sprite.disappear();
+				break;
+			}
+		}
+		// sprites.pop_back();
+	}
+
 	void drawBoundary(Frame* fb, Color color = Color::WHITE, int thickness = 0) {
 		Line(viewPos, Point(viewPos.x, viewPos.y + viewLen.y), color, thickness).draw(fb);
 		Line(viewPos, Point(viewPos.x + viewLen.x, viewPos.y), color, thickness).draw(fb);

@@ -10,41 +10,40 @@ int main(int argc, char** argv) {
 	FrameBuffer fb;
 
 	// objek-objek pada layar
-	Sprite pesawat("pesawat.txt");
+	Sprite pesawat(Color(127, 127, 255), Color::BLUE);
+	pesawat.add("object/plane");
 	Bullet peluruPesawat;
-	Polyline ledakanPesawat[3] = {Polyline("ledakan1.txt"), Polyline("ledakan2.txt"), Polyline("ledakan3.txt")};
+	Sprite ledakanPesawat[3] = {Sprite(Color::RED), Sprite(Color::GREEN), Sprite(Color::BLUE)};
+	ledakanPesawat[0].add("object/explosion1");
+	ledakanPesawat[1].add("object/explosion2");
+	ledakanPesawat[2].add("object/explosion3");
 	bool isPesawatLedak = false;
 	int kondisiPesawatLedak = 0;
 	float periodePesawatLedak = 4.0;
 	int xPesawatLedak, yPesawatLedak;
 
-	Sprite kapal("kapal.txt");
-	kapal.color = Color::GREEN;
+	Sprite kapal(Color(255, 127, 127), Color::RED);
+	kapal.add("object/ship");
 	Bullet peluruKapal;
-	Polyline ledakanKapal[3] = {Polyline("ledakan1.txt"), Polyline("ledakan2.txt"), Polyline("ledakan3.txt")};
+	Sprite ledakanKapal[3] = {Sprite(Color::RED), Sprite(Color::GREEN), Sprite(Color::BLUE)};
+	ledakanKapal[0].add("object/explosion1");
+	ledakanKapal[1].add("object/explosion2");
+	ledakanKapal[2].add("object/explosion3");
 	bool isKapalLedak = false;
 	int kondisiKapalLedak = 0;
 	float periodeKapalLedak = 4.0;
 	int xKapalLedak, yKapalLedak;
 	
-	for (int it = 0; it < 3; ++it)
-		ledakanPesawat[it].color = ledakanKapal[it].color = Color::RED;
-	pesawat.vx = -300;
-	pesawat.vy = 0;
-	pesawat.x = fb.xres;
-	pesawat.y = 0;
-	pesawat.color = Color::BLUE;
-	peluruPesawat.lengthx = 0, peluruPesawat.vx = 0;
-	peluruPesawat.lengthy = 30, peluruPesawat.vy = 130;
+	pesawat.setV(Point(-300, 0));
+	pesawat.setPos(Point(fb.getXSize(), 0));
+	peluruPesawat.size = Point(0, 30);
+	peluruPesawat.v = Point(0, 130);
 	bool existPeluruPesawat = false;
 
-	kapal.vx = 120;
-	kapal.vy = 0;
-	kapal.x = 0;
-	kapal.y = fb.yres / 2;
-	kapal.color = Color::WHITE;
-	peluruKapal.lengthx = 0, peluruKapal.vx = 0;
-	peluruKapal.lengthy = -30, peluruKapal.vy = -120;
+	kapal.setV(Point(120, 0));
+	kapal.setPos(Point(0, fb.getYSize() / 2));
+	peluruKapal.size = Point(0, -30);
+	peluruKapal.v = Point(0, -120);
 	bool existPeluruKapal = false;
 
 	// bagian yang mengatur framerate layar
@@ -56,17 +55,15 @@ int main(int argc, char** argv) {
 		// gambar objek
 
 		if (isPesawatLedak == true) {
-			ledakanPesawat[kondisiPesawatLedak].draw(&fb, xPesawatLedak, yPesawatLedak);
-			pesawat.x = fb.xres;
-			pesawat.y = 0;
+			ledakanPesawat[kondisiPesawatLedak].draw(&fb, Point(xPesawatLedak, yPesawatLedak));
+			pesawat.setPos(Point(fb.getXSize(), 0));
 		}
 		else
 			pesawat.draw(&fb);
 
 		if (isKapalLedak == true) {
-			kapal.x = 0;
-			kapal.y = fb.yres / 2;
-			ledakanKapal[kondisiKapalLedak].draw(&fb, xKapalLedak, yKapalLedak);
+			kapal.setPos(Point(0, fb.getYSize() / 2));
+			ledakanKapal[kondisiKapalLedak].draw(&fb, Point(xKapalLedak, yKapalLedak));
 		}
 		else
 			kapal.draw(&fb);
@@ -87,20 +84,20 @@ int main(int argc, char** argv) {
 		// update objek
 		// pesawat
 		pesawat.update(1. / framerate);
-		if (pesawat.x >= fb.xres) {
-			pesawat.x = 0;
+		if (pesawat.getPos().x >= fb.getXSize()) {
+			pesawat.getPos().x = 0;
 		}
-		else if (pesawat.x + pesawat.sizex < 0) {
-			pesawat.x = fb.xres - 1;
+		else if (pesawat.getPos().x + pesawat.getBottomRight().x < 0) {
+			pesawat.getPos().x = fb.getXSize() - 1;
 		}
 
 		// kapal
 		kapal.update(1. / framerate);
-		if (kapal.x >= fb.xres) {
-			kapal.x = 0;
+		if (kapal.getPos().x >= fb.getXSize()) {
+			kapal.getPos().x = 0;
 		}
-		else if (kapal.x + kapal.sizex < 0) {
-			kapal.x = fb.xres - 1;
+		else if (kapal.getPos().x + kapal.getBottomRight().x < 0) {
+			kapal.getPos().x = fb.getXSize() - 1;
 		}
 
 		// peluruKapal pesawat
@@ -108,13 +105,13 @@ int main(int argc, char** argv) {
 		if (periodePesawat < 0) {
 			existPeluruPesawat = true;
 			periodePesawat = 5.0;
-			peluruPesawat.x = pesawat.x;
-			peluruPesawat.y = pesawat.y+pesawat.sizey;
+			peluruPesawat.p.x = pesawat.getPos().x;
+			peluruPesawat.p.y = pesawat.getPos().y+pesawat.getSize().y;
 		}
 		if (existPeluruPesawat)
 			peluruPesawat.update(1. / framerate);
-		if (peluruPesawat.y > kapal.y) {
-			peluruPesawat.x = peluruPesawat.y = 0;
+		if (peluruPesawat.p.y > kapal.getPos().y) {
+			peluruPesawat.p.x = peluruPesawat.p.y = 0;
 			existPeluruPesawat = false;
 		}
 
@@ -123,8 +120,8 @@ int main(int argc, char** argv) {
 		if (periodeKapal < 0) {
 			existPeluruKapal = true;
 			periodeKapal = 3.0;
-			peluruKapal.x = kapal.x;
-			peluruKapal.y = kapal.y;
+			peluruKapal.p.x = kapal.getPos().x;
+			peluruKapal.p.y = kapal.getPos().y;
 		}
 		if (existPeluruKapal)
 			peluruKapal.update(1. / framerate);
@@ -139,12 +136,12 @@ int main(int argc, char** argv) {
 			}
 		}
 		if (!isPesawatLedak) {
-			if (pesawat.collide(peluruKapal.x, peluruKapal.y)) {
+			if (pesawat.collide(Point(peluruKapal.p.x, peluruKapal.p.y))) {
 				isPesawatLedak = true;
 				periodePesawatLedak = 1.0;
 				kondisiPesawatLedak = 0;
-				xPesawatLedak = pesawat.x;
-				yPesawatLedak = pesawat.y;
+				xPesawatLedak = pesawat.getPos().x;
+				yPesawatLedak = pesawat.getPos().y;
 			}
 		}
 
@@ -159,17 +156,17 @@ int main(int argc, char** argv) {
 			}
 		}
 		if (!isKapalLedak) {
-			if (kapal.collide(peluruPesawat.x, peluruPesawat.y+15)) {
+			if (kapal.collide(Point(peluruPesawat.p.x, peluruPesawat.p.y+15))) {
 				isKapalLedak = true;
 				periodeKapalLedak = 1.0;
 				kondisiKapalLedak = 0;
-				xKapalLedak = kapal.x-50;
-				yKapalLedak = kapal.y-40;
+				xKapalLedak = kapal.getPos().x-50;
+				yKapalLedak = kapal.getPos().y-40;
 			}
 		}
 
 		// clear screen
-		system("clear");
+		fb.clear();
 	}
 	return 0;
 }

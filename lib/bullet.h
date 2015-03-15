@@ -1,3 +1,6 @@
+#ifndef BULLET_H
+#define BULLET_H
+
 #include "drawable.h"
 #include "polyline.h"
 #include <stdio.h>
@@ -29,3 +32,4 @@ public:
 	Point size;
 	Point v;
 };
+#endif

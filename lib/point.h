@@ -77,14 +77,14 @@ Point operator-(const Point &p1, const Point &p2) {
 Point operator+(const Point &p1, const Point &p2) {
 	return Point(p1.x + p2.x, p1.y + p2.y);
 }
-Point operator*(const Point &p, const double &s) {
+Point operator*(const Point &p, const float &s) {
 	return Point(p.x * s, p.y * s);
 }
-Point operator/(const Point &p, const double &s) {
+Point operator/(const Point &p, const float &s) {
 	return p * (1./s);
 }
 bool operator<(const Point &p1, const Point &p2) {
-	if (p1.x != p2.x) return p1.x < p2.x;
+	if (fabs(p1.x - p2.x) < 1e-3) return p1.x < p2.x;
 	return p1.y < p2.y;
 }
 bool operator==(const Point &p1, const Point &p2) {

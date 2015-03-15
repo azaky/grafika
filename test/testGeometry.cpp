@@ -82,7 +82,7 @@ public:
 
 		for (std::vector<Polygon*>::iterator prismSide = prismSides.begin(); prismSide != prismSides.end(); ++prismSide) {
 			(*prismSide)->color = color;
-			(*prismSide)->borderColor = borderColor;
+			(*prismSide)->borderColor = Color::CYAN;
 			l.add(*prismSide);
 		}
 
@@ -156,7 +156,7 @@ int main() {
 
 	std::vector<Polygon> polygons;
 
-#define INDONESIAN_MAP_FILE "../object/plane"
+#define INDONESIAN_MAP_FILE "../object/indonesia_10km"
 
 	FILE *file = fopen(INDONESIAN_MAP_FILE, "r");
 	if (file == NULL) return 0;
@@ -183,7 +183,7 @@ int main() {
 	// prism.addToLayer(layer);
 	// qrism.addToLayer(layer);
 	for (std::vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); ++polygon) {
-		Prism prism(*polygon, 20);
+		Prism prism(*polygon, 50);
 		prism.addToLayer(layer);
 	}
 
@@ -197,13 +197,15 @@ int main() {
 	int framerate = 15;
 	float period = 1. / framerate;
 	float last_render = clock();
-	
+
 	int iframe = 0;
+
+	Point offset = Point(200, 200);
 
 	while (true) {
 		// Draw objects
 		fb.clear();
-		if (iframe++ % 5 == 0) {
+		if (iframe++ % 50 == 0) {
 			system("clear");
 			printf("Axis  : x = %f, y = %f, wheel = %d\n", axis.x, axis.y, wheel);
 			printf("isInsidePolygon = %s\n", isInside ? "true" : "false");
@@ -212,8 +214,8 @@ int main() {
 		// Draw Polygon
 		// p.draw(&fb);
 		// q.draw(&fb);
-		layer.draw(&fb, Point(200, 200));
-		isInside = Geometry::isPointInsidePolygon(axis, p);
+		layer.draw(&fb, Point(0, 100));
+		isInside = Geometry::isPointInsidePolygon(axis - Point(200, 200), polygons[0]);
 
 		// Mouse
 		axis.x = Mouse::getXAxis();
@@ -223,14 +225,15 @@ int main() {
 		Cursor::DEFAULT.draw(&fb, axis);
 
 		// puter
-		polygons[0].rotate(-1, (polygons[0].getTopLeft() + polygons[0].getBottomRight()) / 2.);
-		layer = Layer();
-		Prism prism(polygons[0], 80);
-		prism.addToLayer(layer);
+		// polygons[0].rotate(1, (polygons[0].getTopLeft() + polygons[0].getBottomRight()) / 2.);
+		// layer = Layer();
+		// Prism prism(polygons[0], 80);
+		// prism.addToLayer(layer);
 
 		// delay sesuai framerate
 		float now_render = clock();
-		usleep(std::max(0., 1e6 / framerate - (now_render - last_render)));
+		usleep(2e6);
+		// usleep(std::max(0., 1e6 / framerate - (now_render - last_render)));
 		last_render = now_render;
 	}
 	

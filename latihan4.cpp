@@ -7,7 +7,7 @@
 int main() {
 	FrameBuffer fb;
 
-	Sprite plane(Color::WHITE, Color::BLUE);
+	Sprite plane(Color(127, 127, 255), Color::BLUE);
 	plane.add("object/plane");
 	plane.resize(0.4);
 	plane.setPos(Point(200, 30));
@@ -23,7 +23,7 @@ int main() {
 	Sprite planeBullet(Color::RED);
 	planeBullet.add("object/bullet");
 	
-	Sprite ship(Color::WHITE, Color::RED);
+	Sprite ship(Color(255, 127, 127), Color::RED);
 	ship.add("object/ship");
 	ship.setPos(Point(200, 400));
 	ship.setV(Point(200, 0));
@@ -67,14 +67,14 @@ int main() {
 		fb.clear();
 		printf("Frame %d\n", iframe++);
 
+		// pesawat & kapal
+		plane.draw(&fb);
+		ship.draw(&fb);
+
 		// baling-baling
 		Sprite tempBlade = blade;
 		tempBlade.rotate(17 * spin++, Point(5, 50));
 		tempBlade.draw(&fb);
-
-		// pesawat & kapal
-		plane.draw(&fb);
-		ship.draw(&fb);
 
 		// peluru
 		if (existPeluruKapal)
@@ -132,7 +132,7 @@ int main() {
 	int nPieces = 3;
 	std::vector<Sprite> pieces;
 	for (int i = 1; i <= nPieces; ++i) {
-		Sprite piece(Color::WHITE, Color::BLUE);
+		Sprite piece(Color(127, 127, 255), Color::BLUE);
 		char temp[100];
 		sprintf(temp, "object/piece%d", i);
 		piece.add(temp);

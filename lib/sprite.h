@@ -81,7 +81,7 @@ public:
 
 	void drawFill(Frame *fb, Frame *fill, Point offset = Point()) {
 		for (std::vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); ++polygon) {
-			polygon->drawFill(fb, fill, offset);
+			polygon->drawFill(fb, fill, pos+offset);
 		}
 	}
 
@@ -204,6 +204,11 @@ public:
 		return lines;
 	}
 
+	void disappear() {
+		defaultColor = Color::EMPTY;
+		defaultBorderColor = Color::EMPTY;
+	}
+
 	void drawBoundingBox(Frame* f, Color color = Color::WHITE) {
 		topLeft += pos;
 		bottomRight += pos;
@@ -215,6 +220,33 @@ public:
 		bottomRight -= pos;
 	}
 
+	void setColor(Color color) {
+		defaultColor = color;
+		for (std::vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); ++polygon) {
+			polygon->color = color;
+		}
+	}
+
+	void setBorderColor(Color color) {
+		defaultBorderColor = color;
+		for (std::vector<Polygon>::iterator polygon = polygons.begin(); polygon != polygons.end(); ++polygon) {
+			polygon->borderColor = color;
+		}
+		for (std::vector<Polyline>::iterator polyline = polylines.begin(); polyline != polylines.end(); ++polyline) {
+			polyline->color = color;
+		}
+	}
+
+	bool equal(Sprite sprite){
+		return (this->pos.x == sprite.getPos().x &&
+				this->pos.y == sprite.getPos().y &&
+				this->v.x == sprite.getV().x &&
+				this->v.y == sprite.getV().y &&
+				this->topLeft.x == sprite.getTopLeft().x &&
+				this->topLeft.y == sprite.getTopLeft().y &&
+				this->bottomRight.x == sprite.getBottomRight().x &&
+				this->bottomRight.y == sprite.getBottomRight().y);
+	}
 private:
 	std::vector<Polygon> polygons;
 	std::vector<Polyline> polylines;
