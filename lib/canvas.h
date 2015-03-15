@@ -62,6 +62,17 @@ public:
 		sprites.push_back(sprite);
 	}
 
+	void removeSprite(Sprite sprite){
+		for(int i = 0; i < sprites.size(); ++i){
+			if(sprites[i]->equal(sprite)){
+				sprites.erase(sprites.begin()+i);
+				sprite.disapear();
+				break;
+			}
+		}
+		// sprites.pop_back();
+	}
+
 	void addPolygonFile(char* filePath) {
 		FILE *file = fopen(filePath, "r");
 
@@ -175,23 +186,23 @@ public:
 			for (int j = 0; j < lines.size(); ++j) {
 				Line newEndpoints = lines[j];
 
-				#define isValid(e) (ComputeOutCode(e.p1)&ComputeOutCode(e.p2)) == INSIDE
-				#define isFinish(e) ((ComputeOutCode(e.p1) == INSIDE) and (ComputeOutCode(e.p2) == INSIDE))
+				#define isValid(e) (ComputeOutCode(e.p0)&ComputeOutCode(e.p1)) == INSIDE
+				#define isFinish(e) ((ComputeOutCode(e.p0) == INSIDE) and (ComputeOutCode(e.p1) == INSIDE))
 				
 				while ((isValid(newEndpoints)) and (not isFinish(newEndpoints))) {
-					OutCode outCode0 = ComputeOutCode(newEndpoints.p1), outCode1 = ComputeOutCode(newEndpoints.p2), outCode;
+					OutCode outCode0 = ComputeOutCode(newEndpoints.p0), outCode1 = ComputeOutCode(newEndpoints.p1), outCode;
 					Point p;
 					if (outCode0 != INSIDE) {
 						outCode = outCode0;
-						p = newEndpoints.p1;
+						p = newEndpoints.p0;
 					}
 					else {
 						outCode = outCode1;
-						p = newEndpoints.p2;
+						p = newEndpoints.p1;
 					}
 
-					int dy = newEndpoints.p1.y-newEndpoints.p2.y;
-					int dx = newEndpoints.p1.x-newEndpoints.p2.x;
+					int dy = newEndpoints.p0.y-newEndpoints.p1.y;
+					int dx = newEndpoints.p0.x-newEndpoints.p1.x;
 					int c = p.x*dy-p.y*dx;
 					if (outCode & TOP) {           // point is above the clip rectangle
 						p.y = (windowPos.y+windowLen.y);
@@ -208,15 +219,15 @@ public:
 					}
 
 					if (outCode == outCode0) {
-						newEndpoints.p1 = p;
+						newEndpoints.p0 = p;
 					}
 					else
-						newEndpoints.p2 = p;
+						newEndpoints.p1 = p;
 				}
 				if (isValid(newEndpoints)) {
 					// adjust the window to view ratio
+					newEndpoints.p0 = windowToView(newEndpoints.p0);
 					newEndpoints.p1 = windowToView(newEndpoints.p1);
-					newEndpoints.p2 = windowToView(newEndpoints.p2);
 					
 					// draw to the view
 					// newEndpoints.color = Color::GREEN;

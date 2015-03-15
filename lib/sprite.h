@@ -128,6 +128,11 @@ public:
 		}
 	}
 
+	void disapear(){
+		defaultColor = Color::EMPTY;
+		defaultBorderColor = Color::EMPTY;
+	}
+
 	void setPos(Point _pos) {
 		pos = _pos;
 	}
@@ -198,8 +203,8 @@ public:
 			}
 		}
 		for (int i = 0; i < lines.size(); ++i) {
+			lines[i].p0 += pos;
 			lines[i].p1 += pos;
-			lines[i].p2 += pos;
 		}
 		return lines;
 	}
@@ -213,6 +218,17 @@ public:
 		Line(Point(bottomRight.x, topLeft.y), bottomRight, color).draw(f);
 		topLeft -= pos;
 		bottomRight -= pos;
+	}
+
+	bool equal(Sprite sprite){
+		return (this->pos.x == sprite.getPos().x &&
+				this->pos.y == sprite.getPos().y &&
+				this->v.x == sprite.getV().x &&
+				this->v.y == sprite.getV().y &&
+				this->topLeft.x == sprite.getTopLeft().x &&
+				this->topLeft.y == sprite.getTopLeft().y &&
+				this->bottomRight.x == sprite.getBottomRight().x &&
+				this->bottomRight.y == sprite.getBottomRight().y);
 	}
 
 private:
